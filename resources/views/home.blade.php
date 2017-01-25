@@ -1,4 +1,4 @@
-@extends('layouts.entry')
+@extends('layouts.app')
 @section('content')
 <!-- //////////////////////// -->
 <div class="inv-start-block inv-bg-block"><img src="images/bg1.jpg" alt="" class="inv-img">
@@ -6,8 +6,8 @@
         <div class="row">
             <div class="col-xs-12">
                 <header class=" inv-block-header margin-lg-t340 margin-lg-b75 margin-sm-t270">
-                    <h1>Explore your City’s Finest</h1>
-                    <h5>We help you to find hotels, restaurents, shops, places to visit, etc in over 150+ Countries</h5>
+                    <h1>Discover You're Favorite Book</h1>
+                    <h5>We help you to find books and trading them </h5>
                 </header>
                 <div class="inv-start-form">
                     <label for="key">

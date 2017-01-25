@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Matching;
+namespace App;
 
 use App\User;
 use App\Book;

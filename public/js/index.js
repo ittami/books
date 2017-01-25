@@ -59,10 +59,10 @@
         izotope_portfolio();
     });
 
-    $(window).on('scroll', function() {
-        onScroll();
-        counters();
-    });
+//    $(window).on('scroll', function() {
+//        onScroll();
+//        counters();
+//   });
 
     /*==============================*/
     /* 05 - FUNCTION ON PAGE RESIZE */

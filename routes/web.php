@@ -24,18 +24,26 @@ Route::get('/addresses/{location}/edit','UsersController@getAddressesEdit');
 Route::post('/addresses/{location}/update','UsersController@updateGeoLocation');
 Route::delete('updateProfile/addresses/{location}/delete','UsersController@deleteGeoLocation');
 
+//Books 
 Route::get('booksList',"BooksController@getBooksList");
 Route::get('booksList/{book}/add',"BooksController@getBook");
-Route::post('booksList/{book}/add',"BooksController@addBook");
-Route::delete('booksList/{book}/delete',"BooksController@deleteBook");
-Route::get('matchMaking',"BooksController@comparingBooks");
+Route::post('/bookAdding',"BooksController@bookAdding");
 
+Route::get('matchMaking',"BooksController@comparingBooks");
 Route::get('aquiringBooks','BooksController@aquiringBooks');
 
+// Notifications
+Route::get('notifications',"NotificationsController@getNotifications");
+Route::get('notification/{notification}',"NotificationsController@getNotification");
+
+//Genres
 Route::get('genres','GenresController@getGenres');
 
-Route::get('usersList/{auther}/autherProfile',"AuthersController@getAutherProfile");
-Route::post('usersList/{auther}/autherFollowing',"AuthersController@autherFollowing");
+// Authers
+Route::get('/authers',"AuthersController@getAuthers");
+Route::get('/authers/{auther}/autherProfile',"AuthersController@getAutherProfile");
+Route::get('/authers/{auther}/autherProfile/books',"AuthersController@getAutherBooks");
+Route::post('/autherFollowing',"AuthersController@autherFollowing");
 
 Route::get('aquiringAuthers','AuthersController@aquiringAuthers');
 

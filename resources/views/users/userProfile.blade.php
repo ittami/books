@@ -5,7 +5,6 @@
 
 
 
-<div style="height:100px;"></div>  
 
 <div class="col-xs-12">
     <div class="change-block-size col-lg-4 col-sm-6">
@@ -38,12 +37,6 @@
         </div>
     </div>
 </div>
-<div style="height:100px;"></div>  
-<div class="container padd-lr0">
-    <div class="row margin-lg-t155">
-
-    </div>
-</div>
 
 <div class="bg7">
     <div class="inv-listing-result inv-listing-result-js2 listpage">
@@ -66,7 +59,7 @@
                             <div class="bg8 inv-list-style2 inv-places2-row">
                                 <div class="inv-places2-info">
                                     <h3>
-                                        <a href="/usersList/{{$auther->id}}/autherProfile">{{ $auther->name }}</a>
+                                        <a href="/authers/{{$auther->id}}/autherProfile">{{ $auther->name }}</a>
                                     </h3>
                                 </div>
                             </div>
@@ -113,7 +106,7 @@
                                                 <span>by</span>
                                                 <h3>
                                                     @foreach($book->authers as $auther)
-                                                    <a href="/usersList/{{$auther->id}}/autherProfile">{{ $auther->name }}</a>
+                                                    <a href="/authers/{{$auther->id}}/autherProfile">{{ $auther->name }}</a>
                                                     @endforeach
                                                 </h3>
                                             </li>
@@ -132,18 +125,5 @@
         </div>
     </div>
 </div>
-
-
-
-<script type="text/javascript">
-    $(.markedRead).onclick(function () {
-        $.ajax({
-            url: '/markRead',
-            type: 'post',
-
-        });
-    });
-
-</script>
 
 @endsection

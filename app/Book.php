@@ -14,7 +14,7 @@ class Book extends Model {
         return $this->belongsToMany(User::class, 'books_users')->withPivot('status');
     }
 
-    public function getUserHasItAttribute() {
+    public function getUserHasBookAttribute() {
 
         return (auth()->check()) ? in_array($this->id, auth()->user()->books->pluck('id')->toArray()) : false;
     }

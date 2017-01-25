@@ -1,8 +1,7 @@
-        <?php
-
-namespace App\Notifications;
+<?php namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -69,8 +68,9 @@ class BookMatch extends Notification
             'type' => $this->type,
             'matche_user_id' => $this->matchedUserId,
             'book_id' => $this->bookId,
-            'have_location_id' => $this->haveLocationId,
             'want_location_id' => $this->wantLocationId,
+            'have_location_id' => $this->haveLocationId,
+           
         ];
     }
 

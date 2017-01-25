@@ -11,18 +11,36 @@ use App\Notifications\BookMatch;
 
 class AuthersController extends Controller {
 
+    public function getAuthers() {
+        $authers = Auther::get();
+        return view('authers.authers', compact('authers'));
+    }
+
     public function getAutherProfile(Auther $auther, User $user) {
         return view('authers.autherProfile', compact('auther', 'user'));
     }
+    
+    public function getAutherBooks(Auther $auther) {
+       $books = $auther->books;
+        return view('authers.autherBooks',compact('books','auther'));
+    }
 
-    public function autherFollowing(Auther $auther) {
+    public function autherFollowing(Request $request) {
+        $auther = Auther::find($request->get('auther_id'));
         $userId = auth()->user()->id;
+        
         if ($auther->user_is_following_auther) {
             $auther->users()->detach($userId);
+            $follow = 0 ; 
         } else {
             $auther->users()->attach($userId);
+            $follow = 1 ; 
         }
-        return redirect('/updateProfile');
+        return json_encode([
+            'follow' => $follow 
+        ]);
+       
+         
     }
 
     public function aquiringAuthers() {

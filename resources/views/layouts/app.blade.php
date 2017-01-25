@@ -3,6 +3,7 @@
 
     <head>
         <meta charset="UTF-8">
+        <meta name="csrf_token" content="{{ csrf_token() }}" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
         <meta name="format-detection" content="telephone=no" />
@@ -28,76 +29,91 @@
     </head>
 
     <body>
-        <div class="inv-header ">
+        {{ Auth::check()?'':'redirect(url("/login"))' }}
+        <div class="inv-header  inv-header2 ">
             <div class="container">
-                <div class="wpc-navigation clearfix">
+                <div class="row">
                     <div class="col-xs-12 padd-lr0">
-                        <nav>
-                            <ul class="main-menu">
-                                <li class="menu-item menu-item-has-children active-menu-item">
-                                    <a href="#">Menu</a>
-                                    <ul class="sub-menu">
-                                        <li class="menu-item active-menu-item">
-                                            <a href="{{ url('/home') }}"> Home </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ url('/usersList') }}" >Users</a>
-                                        </li>   
-                                        <li>
-                                            <a href="{{ url('/booksList') }}">Books</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="menu-item menu-item-has-children active-menu-item">
-                                    <a href="#">You</a>
-                                    <ul class="sub-menu">
-                                        <li>
-                                            <a href="{{ url('/updateProfile') }}"> You're Profile </a>
-                                        </li>
-                                        <li class="menu-item ">
-                                            <a href="{{ url('/updateProfile/addresses') }}">Add New Address </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="menu-item menu-item-has-children active-menu-item ">
-                                    <a href="#">Notifications</a>
-                                    @foreach((auth()->user())->unreadNotifications as $notification)
-                                    
-                                    <ul class="sub-menu">
-                                        <li>
-                                            <a href="/usersList/{{ $notification->data['matche_user_id'] }}/userProfile" class="markedRead">Match Found with You and : {{ App\User::find($notification->data['matche_user_id'])->name}}</a>
-                                        </li>
-                                        <li>
-                                            <a href="booksList/{{ App\Book::find($notification->data['book_id']) }}/add">For the Book : {{ App\Book::find($notification->data['book_id']) }}</a>
-                                        </li>
-                                        <li> <a>at : {{ App\Location::find($notification->data['have_location_id'])->name }}</a>
-                                        </li>
+                        <div class="wpc-navigation clearfix">
+                            <div class="col-xs-12 padd-lr0">
+                                <nav>
+                                    <ul class="main-menu">
+                                        <li class="menu-item menu-item-has-children active-menu-item">
+                                            <a href="#">Menu</a>
+                                            <ul class="sub-menu">
+                                                <li class="menu-item active-menu-item">
+                                                    <a href="{{ url('/home') }}"> Home </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ url('/authers') }}">Authers</a>
 
-                                    </ul>
-                                    @endforeach
-                                </li>
-                                <li class="menu-item menu-item-has-children active-menu-item">
-                                    <a href="#">{{Auth::check()?'Logout':'Sign' }}</a>
-                                    @if(Auth::check())
-                                    <ul class="sub-menu">
-                                        <li class="menu-item ">
-                                            <a class="popup-form" href="{{url('/logout')}}"
-                                               onclick="event.preventDefault();
-                                                       document.getElementById('logout-form').submit();">Logout</a>
-                                            <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
-                                                {{ csrf_field() }}
-                                            </form>
-                                    </ul>
-                                    @else
-                                    <ul class="sub-menu">
-                                        <li class="menu-item "><a class="popup-form" href="{{ url('/login') }}">Login</a></li>
-                                        <li class="menu-item "><a class="popup-form" href="{{ url('/register') }}">Register</a></li>
-                                    </ul>
-                                    @endif
+                                                </li>   
+                                                <li>
+                                                    <a href="{{ url('/booksList') }}">Books</a>
+                                                </li>
 
-                                </li>
-                            </ul>
-                        </nav>
+
+                                            </ul>
+                                        </li>
+                                        <li class="menu-item menu-item-has-children active-menu-item">
+                                            <a href="#">You</a>
+                                            <ul class="sub-menu">
+                                                <li>
+                                                    <a href="{{ url('/updateProfile') }}"> You're Profile </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ url('/usersList') }}" >All users</a>   
+                                                </li>
+                                                <li class="menu-item ">
+                                                    <a href="{{ url('/updateProfile/addresses') }}">Add New Address </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="menu-item menu-item-has-children active-menu-item ">
+                                            <a href="#">Notifications</a>  
+
+
+                                            <ul class="sub-menu">
+                                                @foreach(Auth::user()->unreadNotifications as $notification) 
+                                                <li> 
+
+                                                    @if((class_basename($notification->type)) == 'BookMatch')
+                                                    <a href='/notification/{{ $notification->id }}'> {{ (class_basename($notification->type))}} with {{ App\User::find($notification->data['matche_user_id'])->name }} </a>  
+                                                    @endif
+                                                </li>
+                                                @endforeach 
+                                                <li class='bg-info'>
+                                                    <a href='/notifications'>All Notifications</a>
+                                                </li>
+                                            </ul>   
+
+
+
+                                        </li>
+                                        <li class="menu-item menu-item-has-children active-menu-item">
+                                            <a href="#">{{Auth::check()?'Logout':'Sign' }}</a>
+                                            @if(Auth::check())
+                                            <ul class="sub-menu">
+                                                <li class="menu-item ">
+                                                    <a class="popup-form" href="{{url('/logout')}}"
+                                                       onclick="event.preventDefault();
+                                                               document.getElementById('logout-form').submit();">Logout</a>
+                                                    <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
+                                                        {{ csrf_field() }}
+                                                    </form>
+                                            </ul>
+                                            @else
+                                            <ul class="sub-menu">
+                                                <li class="menu-item "><a class="popup-form" href="{{ url('/login') }}">Login</a></li>
+                                                <li class="menu-item "><a class="popup-form" href="{{ url('/register') }}">Register</a></li>
+                                            </ul>
+                                            @endif
+
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,13 +121,19 @@
 
 
 
+
         @yield('content')
 
         <!-- FOOTER -->
-
-        <footer class="inv-bg-block padding-lg-t115 padding-lg-b105 padding-xs-t0 padding-xs-b50">
-            <img src="images/world-map.jpg" alt="" class="inv-img">
+        <footer  class="inv-bg-block bg7 padding-lg-t115 padding-lg-b105 padding-xs-t0 padding-xs-b50">
             <div class="container">
+                <div class="row">
+
+                </div>
+            </div>
+        </footer>
+        <div class="inv-copy bg-12">
+            <div class="container padd-lr0">
                 <div class="row">
                     <div class="col-md-3 col-sm-6 padd-lr0">
                         <div class="inv-address">
@@ -126,16 +148,10 @@
                     </div>
                 </div>
             </div>
-        </footer>
-        <div class="inv-copy bg-12">
-            <div class="container padd-lr0">
-                <div class="row">
-                    <div class="col-xs-12">
-
-                    </div>
-                </div>
-            </div>
         </div>
+
+
+
 
 
 
@@ -162,16 +178,9 @@
         <script type="text/javascript" src="{{ url('/js/jquery.matchHeight.js') }}"></script>
         <script type="text/javascript" src="{{ url('/js/index.js') }}"></script>
         <!-- sixth block end -->
-        <script type="text/javascript">
-            $('.markedRead').click(function () {
-                $.ajax({
-                    url: '/markRead',
-                    type: 'post'
-
-                });
-            });
-
-        </script>
+        
+        @yield('footing')
     </body>
 
 </html>
+

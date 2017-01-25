@@ -15,8 +15,27 @@ class BooksController extends Controller {
         $this->middleware('auth')->only(['addBook', 'deleteBook']);
     }
 
-    public function getBooksList() {
-        $books = Book::get();
+    public function getBooksList(Request $request) {
+        $query = Book::query();
+
+        if ($request->get('auther')) {
+            $query->whereHas('authers', function($q)use($request) {
+                $q->where('name', 'like', '%' . $request->get('auther') . '%');
+            });
+        }
+
+
+        if ($request->get('genre')) {
+            $query->whereHas('genres', function($q)use($request) {
+                $q->where('name', 'like', '%' . $request->get('genre') . '%');
+            });
+        }
+
+        if ($request->get('search')) {
+            $query->where('title', 'like', '%' . $request->get('search') . '%');
+        }
+//        dd($query->toSql());
+        $books = $query->get();
         return view('books.booksList', compact('books'));
     }
 
@@ -24,24 +43,25 @@ class BooksController extends Controller {
         return view('books.addBook', compact('book'));
     }
 
-    public function addBook(Request $request, Book $book) {
+    public function bookAdding(Request $request) {
+        $book = Book::find($request->get('book_id'));
         $user = auth()->user();
-        $user->books()->attach($book->id, ['status' => $request->get('status')]);
-        return redirect('/home');
-    }
+        if ($book->user_has_book) {
 
-    public function deleteBook(Book $book) {
-        $user = auth()->user();
-        if ($user->books()) {
             $user->books()->detach($book->id);
+            $bookInterest = 0 ; 
+        
         } else {
-            abort(404);
+            $user->books()->attach($book->id, ['status' => $request->get('status')]);
+            $bookInterest = 1 ;
         }
-        return redirect('/home');
+        return json_encode([
+            'book_interest' => $bookInterest
+        ]);
     }
 
     public function markNotificationRead(User $user) {
-        $user->unreadNotifications()->markAsRead();
+        $user->find(user_id)->unreadNotifications()->update(['read_at' => Carbon::now()]);
     }
 
     public static function booksUrlExtractor($uri) {
@@ -55,7 +75,7 @@ class BooksController extends Controller {
                 $genreHtml = new\Htmldom("https://www.goodreads.com$genreUri");
                 foreach ($genreHtml->find('table.tableList tr') as $row) {
                     $bookUri = $row->children(2)->children(0)->href;
-                    //                  code to get the books details from the goodreads
+//                  code to get the books details from the goodreads
                     $bookHtml = new \Htmldom("https://www.goodreads.com$bookUri");
                 }
             }
@@ -66,7 +86,7 @@ class BooksController extends Controller {
         $genreHtml = new\Htmldom("https://www.goodreads.com/list/show/10762.Best_Book_Boyfriends");
         foreach ($genreHtml->find('table.tableList tr') as $row) {
             $bookUri = $row->children(2)->children(0)->href;
-            //                  code to get the books details from the goodreads
+//                  code to get the books details from the goodreads
             $bookHtml = new \Htmldom("https://www.goodreads.com$bookUri");
 
             $isbnCount = DB::table('books')->where('isbn', $bookHtml->find('div[id=bookDataBox]', 0)->children(1)->children(1)->plaintext)->count();
@@ -111,8 +131,6 @@ class BooksController extends Controller {
         }
     }
 
-   
-
     public function comparingBooks() {
         $users = User::get();
         foreach ($users as $wantUser) {
@@ -121,12 +139,14 @@ class BooksController extends Controller {
                 $haveUsers = User::whereHas('booksHave', function($q) use ($wantBook) {
                             $q->where('books.id', $wantBook->id);
                         })->get();
+
 //                dd($haveUsers->first()->notifications);
                 foreach ($haveUsers as $haveUser) {
                     foreach ($wantUser->locations as $wantUserLocation) {
                         foreach ($haveUser->locations as $haveUserLocation) {
                             $distance = Book::comparingCoordinates((float) $haveUserLocation->latitude, (float) $haveUserLocation->longitude
                                             , (float) $wantUserLocation->latitude, (float) $wantUserLocation->longitude) / 1000;
+
                             if ($distance < 10) {//KM
 //                                dd($distance);
 //                                        notify the user who wants the Book 
@@ -139,16 +159,17 @@ class BooksController extends Controller {
                     }
                 }
             }
-            die;
+        }
+        die;
 
 
 
 
 
-            $userWantLat = $user->locations->pluck('latitude');
-            foreach ($user->locations as $location) {
-                dd($location);
-            }
+        $userWantLat = $user->locations->pluck('latitude');
+        foreach ($user->locations as $location) {
+            dd($location);
+        }
 
 
 
@@ -159,37 +180,35 @@ class BooksController extends Controller {
 
 
 
-            dd($userWantLat);
-            foreach ($userWantLat as $latWant) {
-                $floatLatWant = (float) $latWant;
-                $userWantLng = $user->locations->pluck('longitude');
-                foreach ($userWantLng as $lngWant) {
-                    $floatLngWant = (float) $lngWant;
-                    foreach ($wantBooks as $book) {
-                        $haveBook = DB::table('books_users')->where('book_id', $book->id)->where('status', 'have')->get();
-                        foreach ($haveBook as $oneBookHave) {
-                            $haveBookUserId = $oneBookHave->user_id;
-                            $userHaveBook = User::find($haveBookUserId);
+        dd($userWantLat);
+        foreach ($userWantLat as $latWant) {
+            $floatLatWant = (float) $latWant;
+            $userWantLng = $user->locations->pluck('longitude');
+            foreach ($userWantLng as $lngWant) {
+                $floatLngWant = (float) $lngWant;
+                foreach ($wantBooks as $book) {
+                    $haveBook = DB::table('books_users')->where('book_id', $book->id)->where('status', 'have')->get();
+                    foreach ($haveBook as $oneBookHave) {
+                        $haveBookUserId = $oneBookHave->user_id;
+                        $userHaveBook = User::find($haveBookUserId);
 //                      each  Location from locaions for the user who *have* the book needed .
-                            foreach ($userHaveBook->locations as $latHave) {
-                                $floatLatHave = (float) $latHave->latitude;
-                                foreach ($userHaveBook->locations as $lngHave) {
-                                    $floatLngHave = (float) $lngHave->longitude;
+                        foreach ($userHaveBook->locations as $latHave) {
+                            $floatLatHave = (float) $latHave->latitude;
+                            foreach ($userHaveBook->locations as $lngHave) {
+                                $floatLngHave = (float) $lngHave->longitude;
+                                $distance = BooksController::comparingCoordinates($floatLatWant, $floatLngWant, $floatLatHave, $floatLngHave) / 1000;
+
+                                if ($distance < 10) {
+//                                        notify the user who wants the Book 
+                                    $user->notify(new BookMatch);
+//                                        notify the user who have the Book 
+                                    $userHaveBook->notify(new BookMatch);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-
-        $distance = BooksController::comparingCoordinates($floatLatWant, $floatLngWant, $floatLatHave, $floatLngHave) / 1000;
-
-        if ($distance < 10) {
-//                                        notify the user who wants the Book 
-            $user->notify(new BookMatch);
-//                                        notify the user who have the Book 
-            $userHaveBook->notify(new BookMatch);
         }
     }
 
